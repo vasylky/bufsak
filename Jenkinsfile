@@ -1,48 +1,72 @@
 pipeline {
-    agent {
-        docker {
-            image 'node:18-alpine'
-        }
-    }
+    agent any  // Use any available agent
     
     environment {
         NODE_HOME = '/usr/local/bin/node'
+        // Add path to npm if needed
+        PATH = "${env.NODE_HOME}/bin:${env.PATH}"
     }
-
+    
     stages {
         stage('Checkout') {
             steps {
                 git 'https://github.com/vasylky/bufsak.git'
             }
         }
+        
+        stage('Setup Node') {
+            steps {
+                script {
+                    // Check if Node.js is installed
+                    sh 'node --version || (echo "Node.js not found. Please install Node.js on this Jenkins agent" && exit 1)'
+                    sh 'npm --version || (echo "npm not found. Please install npm on this Jenkins agent" && exit 1)'
+                }
+            }
+        }
+        
         stage('Install Dependencies') {
             steps {
-                script {
-                    sh 'npm install'
-                }
+                sh 'npm install'
             }
         }
+        
         stage('Run Tests') {
             steps {
-                script {
-                    sh 'npm test'
-                }
+                sh 'npm test'
             }
         }
+        
         stage('Build') {
             steps {
-                script {
-                    sh 'npm run build'
-                }
+                sh 'npm run build'
             }
         }
+        
         stage('Deploy') {
             steps {
                 script {
-                    sh 'docker build -t mywebapp .'
-                    sh 'docker run -d -p 3000:3000 reactapp'
+                    // Check if Docker is available before attempting Docker commands
+                    def dockerInstalled = sh(script: 'which docker', returnStatus: true) == 0
+                    
+                    if (dockerInstalled) {
+                        sh 'docker build -t mywebapp .'
+                        sh 'docker run -d -p 3000:3000 mywebapp'
+                    } else {
+                        echo "Docker not found. Skipping Docker deployment steps."
+                        echo "To enable Docker deployment, please install Docker on this Jenkins agent."
+                        // You could add alternative deployment steps here
+                    }
                 }
             }
+        }
+    }
+    
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Please check the logs for details.'
         }
     }
 }
