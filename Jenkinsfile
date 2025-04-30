@@ -1,5 +1,9 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'node:18-alpine'
+        }
+    }
     
     environment {
         NODE_HOME = '/usr/local/bin/node'
