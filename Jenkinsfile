@@ -3,6 +3,9 @@ pipeline {
     tools {
         nodejs 'nodejs'
     }
+    tools {
+        dockerTool 'docker'
+    }
     stages {
         stage('Checkout') {
             steps {
