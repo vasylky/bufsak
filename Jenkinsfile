@@ -1,12 +1,8 @@
 pipeline {
-    agent any  // Use any available agent
-    
-    environment {
-        NODE_HOME = '/usr/local/bin/node'
-        // Add path to npm if needed
-        PATH = "${env.NODE_HOME}/bin:${env.PATH}"
+    agent any  
+    tools {
+        nodejs 'nodejs'
     }
-    
     stages {
         stage('Checkout') {
             steps {
@@ -17,7 +13,6 @@ pipeline {
         stage('Setup Node') {
             steps {
                 script {
-                    // Check if Node.js is installed
                     sh 'node --version || (echo "Node.js not found. Please install Node.js on this Jenkins agent" && exit 1)'
                     sh 'npm --version || (echo "npm not found. Please install npm on this Jenkins agent" && exit 1)'
                 }
