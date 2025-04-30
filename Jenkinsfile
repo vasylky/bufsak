@@ -41,8 +41,7 @@ pipeline {
                     def dockerInstalled = sh(script: 'which docker', returnStatus: true) == 0
                     
                     if (dockerInstalled) {
-                                                sh 'docker build -t mywebapp .'
-
+                        sh 'docker --version'
                         sh 'docker build -t mywebapp .'
                         sh 'docker run -d -p 3000:3000 mywebapp'
                     } else {
